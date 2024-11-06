@@ -11,5 +11,20 @@
         <p>
             I'm learning to expand this website and to create video games using the Unity game engine.
         </p>
+
+        <!-- Unity Game Section -->
+    <div id="unity-container" style="width: 960px; height: 600px; margin: 0 auto;">
+        <canvas id="unity-canvas"></canvas>
+        <div id="loading-bar">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Unity Loader Script -->
+    <script src="Snake/UnityLoader.js"></script>
+    <script>
+        var gameInstance = UnityLoader.instantiate("unity-container", "Snake/Build/build.json");
+    </script>
+        
     </body>
 </html>
