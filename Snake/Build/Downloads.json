@@ -1,0 +1,11 @@
+{
+  "dataUrl": "Downloads.data",
+  "frameworkUrl": "Downloads.framework.js",
+  "codeUrl": "Downloads.wasm",
+  "symbolsUrl": "",
+  "memoryUrl": "",
+  "streamingAssetsUrl": "",
+  "companyName": "Camden Gugel",
+  "productName": "Snake",
+  "productVersion": "1.0"
+}
