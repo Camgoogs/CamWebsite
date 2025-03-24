@@ -18,55 +18,25 @@
   </head>
   <body>
 
-    <!-- Title and Intro Text -->
-    <header>
-      <h1>Hi! I'm Camden Gugel, a computer engineer and aspiring game developer.</h1>
-      <p>I'm looking for Summer tech internships for 2025! I'm currently a Junior at North Central College majoring in Computer Engineering with a minor in Interactive Media Studies. Check out my resume!</p>
-    </header>
-
-    <!-- Photo Section -->
-    <div class="photo-section">
-      <img src="./Camden Gugel Current Resume.png" alt="Camden Gugel's Resume Photo" width="550">
-    </div>
-
-    <!-- Additional Text between Photo and Game -->
-    <div class="photo-section">
-      <p>I've been working on recreating some simple games to learn about game development and using the Unity game engine. Click the video below to play my version of Snake using your arrow keys!</p>
-    </div>
-
-    <!-- Additional Paragraph Below Game -->
-<div style="text-align: center; margin-top: 20px;">
-  <p>I'm currently working on expanding this website with more projects, games, and links. Check back soon!</p>
-  <a href="https://github.com/Camgoogs/CamdenGugelCodeSamples/tree/main">Click here for some of my sample code in GitHub.</a>
-  <a href="https://www.linkedin.com/in/camden-gugel-19a6152a5/">Click here to find me on LinkedIn.</a>
-</div>
-
-    <footer>
-      <div class="playsnake">
-        <a href="snake.html">
-          <video autoplay muted loop>
-            <source src="snakegamevideo.mp4" type="video/mp4">
-          </video>
-        </a>
+      <div id="unity-container" class="unity-desktop unity-mobile">
+        <canvas id="unity-canvas" width="auto" height="auto" tabindex="-1"></canvas>
+        <div id="unity-loading-bar">
+          <div id="unity-logo"></div>
+          <div id="unity-progress-bar-empty">
+            <div id="unity-progress-bar-full"></div>
+          </div>
+        </div>
+        <div id="unity-warning"></div>
+        <div id="unity-footer">
+          <div id="unity-webgl-logo"></div>
+          <div id="unity-fullscreen-button"></div>
+          <div id="unity-build-title">SnakeClone</div>
+        </div>
       </div>
-<!--      <div id="unity-container" class="unity-desktop unity-mobile">-->
-<!--        <canvas id="unity-canvas" width="auto" height="auto" tabindex="-1"></canvas>-->
-<!--        <div id="unity-loading-bar">-->
-<!--          <div id="unity-logo"></div>-->
-<!--          <div id="unity-progress-bar-empty">-->
-<!--            <div id="unity-progress-bar-full"></div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--        <div id="unity-warning"></div>-->
-<!--        <div id="unity-footer">-->
-<!--          <div id="unity-webgl-logo"></div>-->
-<!--          <div id="unity-fullscreen-button"></div>-->
-<!--          <div id="unity-build-title">SnakeClone</div>-->
-<!--        </div>-->
-<!--      </div>-->
-      <hr>
+
+      <footer>
       <p>Camden Gugel &copy; 2025</p>
-    </footer>
+      </footer>
 
     <script>
       // JavaScript code remains unchanged
