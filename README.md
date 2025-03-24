@@ -1,2 +1,3 @@
 # CamWebsite
-# Portions of index file made with ChatGPT and Unity OpenGL.
+# Resume website for Camden Gugel.
+# Portions of code made with assistance of ChatGPT and Unity OpenGL.
