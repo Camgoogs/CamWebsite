@@ -1,0 +1,38 @@
+/*
+CSS Style file for resume website camdengugel.tech
+Camden Gugel
+Spring 2025
+Last update: 3/03/25
+web_style.css
+*/
+
+body {
+    width: 100%;
+    background-image: linear-gradient(90deg, white, gray);
+    padding-top: 50px; /* adjust based on navbar height */
+}
+
+header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.photo-section {
+    text-align: center;
+    margin: 1px 0;
+
+}
+
+#unity-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.playsnake {
+    margin-left: 25%;
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
