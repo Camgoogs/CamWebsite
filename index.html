@@ -1,220 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Camden Gugel CodingAWebpageAssignment</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <title>camdengugel.tech</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #222;
+    }
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+    }
+    #bit {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      image-rendering: pixelated;
+      pointer-events: none;
+      z-index: 5;
+    }
+    #portalGif {
+      position: absolute;
+      display: none;
+      transform: scale(0.2);
+      transform-origin: top left;
+      pointer-events: none;
+      z-index: 4;
+    }
+    #infoBox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      padding: 40px;
+      font-family: sans-serif;
+      font-size: 20px;
+      display: none;
+      z-index: 10;
+      overflow-y: auto;
+    }
+    #controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 14px;
+      z-index: 5;
+    }
+  </style>
 </head>
 
 <body>
+  <div id="infoBox"></div>
+  <div id="controls">Controls: Move using A/D, ⬅️/➡️, or scroll — Jump with W, ⬆️, or Spacebar — Jump into boxes or click them to view info</div>
+  <canvas id="gameCanvas"></canvas>
+  <div id="bit-container"></div>
+  <img id="portalGif" src="portal.gif" />
 
-  <!-- Hero Section-->
-  <header class="hero-section">
-    <h1>The Ultimate Guide To Choosing Fonts</h1>
-    <h3>Typography is vital for communication in design. Understanding the fundamentals of type and how to choose the
-        best typeface pairings can improve your designs dramatically. After reading this guide, choosing fonts will
-        be a breeze.</h3>
-    <address>By Monica Galvan</address>
-  </header>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-  <!-- Intro Section -->
-  <section class="intro-section">
-    <h2>Is it a font or a typeface?</h2>
-        <p>Let’s talk about the elephant in the room first. Font vs typeface, what’s the difference? Which is correct?
-        The terms typeface and font are sometimes used interchangeably which can be a little confusing.</p>
-        <p>A <b>typeface</b> is a collection of fonts while a <b>font</b> refers to a specific style or weight within a
-        typeface family. So let’s put this context with an example. Helvetica is a typeface. But Helvetica Bold is a
-        specific font within the Helvetica typeface family. <a href="https://www.geeksforgeeks.org/websites-apps/difference-between-typeface-and-font/">Here’s a visual example</a> so you can see the difference
-        between a typeface and fonts.</p>
-  </section>
+    const bitContainer = document.getElementById("bit-container");
+    const portalGif = document.getElementById("portalGif");
 
-  <!-- What is Typography? Section -->
-  <section class="info-section">
-    <div class="text-image reverse">
-      <div class="image-block">
-        <img src="images/typography_collage.jpg" alt="Typography Image - Collage" width="600" height="380">
-        <cite>Typography Bad Examples by Camden Gugel </cite>
-      </div>
+    let bit = document.createElement("img");
+    bit.id = "bit";
+    bit.src = "Sprites/bit_idle.gif";
+    bitContainer.appendChild(bit);
 
-      <div>
-        <h2>What is typography?</h2>
-        <p>Now that we understand what a typeface and a font are, what is typography? Typography is the art and technique of arranging type. Whether you’re designing a website, an app, or a poster, you’re using type to deliver a message.</p>
-        <p>Typography serves two main purposes. The first is it must be legible. Can a user read and understand it? The second is how you use typography to create a mood or design aesthetic to attract a specific audience.</p>
-        <p>Learning the fundamental rules of type, so you can break them later, will help you become a better designer. It just takes practice and a little knowledge. If you want to learn more about type and how it relates to design, check out this article: <a href="https://www.flux-academy.com/blog/what-is-typography">What is typography?</a></p>
-      </div>
-    </div>
-  </section>
+    const infoBox = document.getElementById("infoBox");
 
-  <!-- Category Section -->
-  <section class="category-section">
-    <h2>Categories of type</h2>
-    <p>In order to know how to choose fonts, we need to understand the various categories of type, the characteristics of each, and recommended usage. In this guide, we’ll refer to three different categories of type when choosing font pairings.</p>
+    const worldWidth = 3000;
+    let camX = 0;
+    let activeSection = null;
+    let lastDirection = "idle";
 
-    <div class="text-image">
-      <div class="image-block">
-      <img src="images/serif-example.jpeg" alt="Serif font image example">
-        <cite>Serif Font by Asenbayu - Adobe Free </cite>
-      </div>
-      <div>
-        <h3>Serif typefaces</h3>
-        <p>A serif is a small line or stroke attached to the end of a larger stroke, often referred to as the “feet” shown at the bottom of letters. Not all serifs are equal. Some have slight variations depending on the typeface and that is part of what makes them unique. An advantage of using serif typefaces is how many font weights they usually have within a family. One serif family might have a regular, italics, semi bold, semi bold italic, bold, bold italic, small caps, and more.</p>
-        <p>Serif typefaces are more formal and traditional. They’re often used editorially such as in newspapers, magazines, and the body copy of books. One of the most well-known serif typefaces and probably the first font you ever used on a computer is Times New Roman.</p>
-      </div>
-    </div>
+    const player = {
+      x: 100,
+      y: canvas.height - 140,
+      width: 40,
+      height: 60,
+      speed: 5,
+      dy: 0,
+      gravity: 0.8,
+      jumpStrength: -15,
+      onGround: true
+    };
 
-    <div class="text-image reverse">
-      <div class="image-block">
-      <img src="images/sans-serif-example.jpeg" alt="Sans-serif font image example">
-      <cite>Sans Serif Font by pararel terror - Adobe Free </cite>
-      </div>
-      <div>
-        <h3>Sans serif typefaces</h3>
-        <p>Sans serif typefaces do not have serifs (the French word sans, means “without”). These typefaces are more modern, bold, and great for eye-catching headlines. One of the most popular sans serif typefaces is Arial which is a copycat of Helvetica. Our main brand fonts here at Flux are two san serif typefaces.</p>
-      </div>
-    </div>
+    const groundY = canvas.height - 80;
 
-    <div class="text-image">
-      <div class="image-block">
-      <img src="images/decorative-font-example.jpeg" alt="Decorative font image example">
-      <cite>Decorative Font by Asenbayu - Adobe Free </cite>
-      </div>
-      <div>
-        <h3>Decorative typefaces</h3>
-        <p>This category of typeface should be used sparingly, most for titles and headlines. It can range from scripts to monotype, and anything in between. These are a great way to add character to your design but should be avoided for long paragraphs of body copy as they can be difficult to read.</p>
-      </div>
-    </div>
+    const keys = {};
+    window.addEventListener("keydown", e => keys[e.key] = true);
+    window.addEventListener("keyup", e => keys[e.key] = false);
 
-    <div class="center">
-      <a href="https://fonts.google.com" class="button">Find a Google Font</a>
-    </div>
-  </section>
+    const sections = [
+      {
+        x: 200,
+        title: "About Me",
+        content: `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+            <div style="flex: 1;">
+              <p>Hi! I'm Camden Gugel, a computer engineer and aspiring game developer.</p>
+              <p>I'm looking for entry-level positions in Software Development, IT, or Game Design for when I graduate next year.</p>
+              <p>I'm a rising Senior at North Central College majoring in Computer Engineering with a minor in Interactive Media Studies.</p>
+              <p>This website is for learning about me, and may contain a few easter eggs!</p>
+            </div>
+            <img src="./selfie.jpeg" alt="Camden Gugel Selfie" style="height: 200px; border-radius: 10px;" />
+          </div>
+        `
+      },
+      {
+        x: 800,
+        title: "Skills",
+        content: `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+            <div style="flex: 1;">
+              <p>Here are some of my technical skills:</p>
+              <p>Fluent in coding Java, Python, and C++, as well as web development with HTML, CSS, and JS.</p>
+              <p>Understanding of Unity game engine, various digital audio workspaces, and CAD software.</p>
+              <p>Experience with circuit board design including Arduino and FPGA systems.</p>
+              <p>Click my resume on the right to see my full skill set!</p>
+            </div>
+            <a href="resume.html" target="_blank">
+              <img src="./Camden Gugel Current Resume.png" alt="Resume" style="height: 200px; border-radius: 10px; cursor: pointer;" />
+            </a>
+          </div>
+        `
+      },
+      {
+        x: 1500,
+        title: "Projects",
+        content: `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+            <div style="flex: 1;">
+              <p>I'm currently working on learning to create games using Unity, with my game "BloodSmith" planned to release next year. Click the video to the right to play my version of Snake made in Unity!</p>
+              <p></p>
+              <a href="https://docs.google.com/document/d/1j6N1Tk03lfLzubYbKCQxyrfcKEVVWuZnpKidctKv6As/edit?usp=sharing" target="_blank">Click here to see the BloodSmith Design Document</a>
+              <p>My personal and school projects/code can be found on my GitHub.</p>
+              <p></p>
+              <a href="https://github.com/Camgoogs/CamdenGugelCodeSamples/tree/main" target="_blank">Click here for some of my sample code in Github.</a>
+            </div>
+            <div class="playsnake">
+              <a href="snake.html" target="_blank">
+                <video autoplay muted loop style="height: 200px; border-radius: 10px; cursor: pointer;">
+                  <source src="snakegamevideo.mp4" type="video/mp4">
+                </video>
+              </a>
+            </div>
+          </div>
+        `
+      },
+      {
+        x: 2300,
+        title: "Contact",
+        content: `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+            <div style="flex: 1;">
+              <p>Contact me!</p>
+              <p>Email: camgoogs@gmail.com</p>
+              <a href="https://www.linkedin.com/in/camden-gugel" target="_blank">Click here to find me on LinkedIn!</a>
+            </div>
+          </div>
+        `
+      },
+      {
+        x: 2800,
+        title: "???",
+        content: `
+          <div><a href="platformer.html" target="_blank">Click here to start an adventure...</a></div>
+        `
+      }
+    ];
 
-  <!-- Tips Section -->
-  <section class="tips-section">
-    <h2>Tips for choosing fonts</h2>
-    <p>We’ve discussed what typography is as well as some of the main categories of type, now let’s dive into tips for how to choose the best fonts.</p>
+    function drawTextBox(section) {
+  const boxX = section.x - camX;
+  const boxY = groundY - 180;
 
-    <h3>Start with inspiration</h3>
-    <p>An important part of the design process is research and inspiration. One of my favorite places to find design inspiration is on Pinterest. Let’s say I’m working on designing a poster to advertise an event. On Pinterest, I searched for “bold poster design." There’s a lot of fun typefaces that might inspire the next one you use for your design.</p>
-    <p>Type really influences the mood of the design. For more tips on why typography is important in design, <a href="https://www.w3schools.com/Html" class="blue-background-link">check out this article to learn more.</a></p>
+  const portalEl = document.getElementById("portalGif");
 
-    <h3>Choose with your main font first</h3>
-    <p>No matter what you are designing, you should have a main font. When it comes to web design, most likely this will be used in your title or headline text. It’s meant to be an accent, to stand out, and influence the mood of your design. It doesn’t really matter what type of font it is, but knowing the first one will help you choose your second.</p>
-    <p>Check out this video where Ran gives 3 tips to improve your typography.</p>
-    <div style="text-align:center;">
-      <iframe width="560" height="315" src="https://www.youtube.com/embed/T5bnFdXSBRA"> </iframe>
-    </div>
+  if (section.title === "???") {
+    portalEl.style.left = `${boxX}px`;
+    portalEl.style.top = `${boxY - 50}px`;
+    portalEl.style.display = "block";
+  } else {
+    portalEl.style.display = "none";
 
-    <h3>Create contrast with your second font</h3>
-    <p>Now that you have a main font for your design, the best way to choose a good secondary font is to make sure it’s dramatically different yet complements the design. You wouldn’t want to choose two serifs that look similar, there is no contrast and in fact, it looks like a design mistake.</p>
+    // Choose different color based on section
+    let boxColor = "#fff"; // default
+    if (section.title === "About Me") boxColor = "#00d0ff"; // light blue
+    else if (section.title === "Skills") boxColor = "#00ff90"; // greenish
+    else if (section.title === "Projects") boxColor = "#ffb300"; // orange
+    else if (section.title === "Contact") boxColor = "#ff0055"; // pinkish red
 
-    <h3>Try pairing opposites</h3>
-    <p>One of these ways to choose fonts is to choose a pair of opposites. A good example of this is to use a big and bold serif for your headline and a nice traditional serif typeface for the body copy. Take a look at this example, to see this tip in action.</p>
+    ctx.fillStyle = boxColor;
+    ctx.beginPath();
+    const radius = 20;
+    ctx.moveTo(boxX + radius, boxY);
+    ctx.lineTo(boxX + 200 - radius, boxY);
+    ctx.quadraticCurveTo(boxX + 200, boxY, boxX + 200, boxY + radius);
+    ctx.lineTo(boxX + 200, boxY + 80 - radius);
+    ctx.quadraticCurveTo(boxX + 200, boxY + 80, boxX + 200 - radius, boxY + 80);
+    ctx.lineTo(boxX + radius, boxY + 80);
+    ctx.quadraticCurveTo(boxX, boxY + 80, boxX, boxY + 80 - radius);
+    ctx.lineTo(boxX, boxY + radius);
+    ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
+    ctx.closePath();
+    ctx.fill();
 
-    <div class="center">
-      <a href="https://cdn.prod.website-files.com/64fa82cbdeed167ebaefef84/64fa86a841d7a2600b45bb61_6063b72aa331d2531e133a5b_6G3BiSeeIsd1xJzcUxOrOfpE6OqgKoYEMwmfTGMKEe_SE857zzkMv0_gZBoR7MaavEThMp8AsIPBeOf5ULK59Ps0g7oeDslDc73hs-D5LFnfVQClcoC5nRA0woaPeN4vpB6-bP7P.jpeg" class="button">Here's an example</a>
-    </div>
+    ctx.fillStyle = "#000"; // black text
+    ctx.font = "bold 18px 'Orbitron', sans-serif"; // techno font
+    ctx.fillText(section.title, boxX + 20, boxY + 45);
+  }
 
-    <h3>Vary width</h3>
-    <p>Another tip is to think about the width of the typeface and how they complement each other. For example, maybe you want to pair a condensed sans serif typeface with a wider san serif. While they are both the same category of type, they vary in contrast due to their width.</p>
-  </section>
+  section._drawnX = boxX;
+  section._drawnY = boxY;
+}
 
-  <!-- Examples Section -->
-  <section class="examples-section">
-    <h3>Consider shape: Geometric vs organic</h3>
+    function checkSectionCollisions() {
+      for (let section of sections) {
+        const sectionBox = { x: section.x, y: groundY - 180, width: 200, height: 80 };
+        const playerBox = { x: player.x, y: player.y, width: player.width, height: player.height };
 
-    <div class="text-image">
-      <div class="image-block">
-      <img src="images/limits-of-control.jpeg" alt="Limits of control poster design">
-      <cite>Poster design using the geometric typeface Futura</cite>
-      </div>
-      <div>
-        <p>Typefaces can have geometric or organic attributes in their shape. One of the most well-known geometric typefaces is Futura, notice how open and round the O is in this poster design example.</p>
-      </div>
-    </div>
+        if (
+          playerBox.x < sectionBox.x + sectionBox.width &&
+          playerBox.x + playerBox.width > sectionBox.x &&
+          playerBox.y < sectionBox.y + sectionBox.height &&
+          playerBox.y + playerBox.height > sectionBox.y
+        ) {
+          if (section.title === "???") {
+            window.location.href = "platformer.html";
+            return;
+          }
+          if (activeSection !== section.title) {
+            activeSection = section.title;
+            infoBox.innerHTML = section.content;
+            infoBox.style.display = "block";
+          }
+          return;
+        }
+      }
+    }
 
-    <div class="text-image reverse">
-      <div class="image-block">
-      <img src="images/lomography.png" alt="Lomo-graphy poster design">
-      <cite>Example of a geometric sans serif typeface (source: Dribbble)</cite>
-      </div>
-      <div>
-        <p>In this example, the main headline uses a modern geometric sans serif typeface. This font choice helps establish the rest of the design, it pairs well with the Lomography logotype, the camera product photo, and other design elements.</p>
-      </div>
-    </div>
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX;
+      const clickY = e.clientY;
 
-    <div class="text-image">
-      <div class="image-block">
-      <img src="images/honeywild.jpeg" alt="Honey wild font design example">
-      <cite>Example of an organic typeface pairing (source: Etsy)</cite>
-      </div>
-      <div>
-        <p>In contrast to the above geometric typeface, notice how organic this typeface pairing is. There’s plenty of variation in the characters, it almost looks a little hand-done. This adds a quirky quality to the design if that’s what you are going for.</p>
-      </div>
-    </div>
+      for (let section of sections) {
+        if (
+          clickX >= section._drawnX &&
+          clickX <= section._drawnX + 200 &&
+          clickY >= section._drawnY &&
+          clickY <= section._drawnY + 80
+        ) {
+          activeSection = section.title;
+          infoBox.innerHTML = section.content;
+          infoBox.style.display = "block";
+          break;
+        }
+      }
+    });
 
-    <div class="text-image reverse">
-      <div class="image-block">
-      <img src="images/cutto.jpeg" alt="Cut-To poster design example" width="500" height="600">
-      <cite>Poster design with 3 typefaces</cite>
-      </div>
-      <div>
-        <h3>Limit your design to 2–3 typefaces</h3>
-        <p>Just like choosing a color palette, it can be easy to get carried away with all the options available to use for your design. A good general rule is to stick to about 2–3 different typefaces total for a design. Now of course this might vary depending on what you are designing but it’s a good rule of thumb.</p>
-        <p>For example, if you’re designing a logo you’ll most likely modify one main font and maybe use a secondary typeface. For a website or an app, you’ll likely want to follow the same rule. Especially when designing for digital screens, legibility and accessibility are key to creating a good user experience.</p>
-        <p>Take a look at this poster designed for the Tribeca Film Festival. It’s a successful design for many reasons such as using scale with type, a good use of space, and hierarchy. But notice how they limited the design to three typefaces. The “CUT” and “TO” are two distinctly different bold serif typefaces. The first is thick and condensed while the second is still bold but wide. These are further paired well with a third monotype (think, typewriter) font for the main body copy with the fine details of the event.</p>
-      </div>
-    </div>
+    window.addEventListener("wheel", (e) => {
+      if (e.deltaY < 0) {
+        player.x -= player.speed * 10;
+      } else {
+        player.x += player.speed * 10;
+      }
+    });
 
-    <div class="text-image">
-      <div class="image-block">
-      <img src="images/trendy-fonts.jpg" alt="Trendy fonts bad examples" width="500" height="400">
-      <cite>Bad Trendy Fonts by Camden Gugel</cite>
-      </div>
-      <div>
-    <h3>Avoid trendy or popular typefaces</h3>
-    <p>You want to choose typefaces that stand the test of time. Be wary of trendy or popular typefaces that you see everyone else using. If you choose something too niche or close to the times when designing a logo, for example, you’ll find yourself having to redesign it after a few short years. To avoid your design becoming outdated, include classic and well-known typefaces. Check out this fun article on <a href="https://blog.spoongraphics.co.uk/articles/25-classic-fonts-that-will-last-a-whole-design-career">25 classic fonts that will last a whole design career.</a></p>
-        </div>
-    </div>
+    function updateBitSprite(direction) {
+      if (direction !== lastDirection) {
+        bitContainer.removeChild(bit);
+        bit = document.createElement("img");
+        bit.id = "bit";
+        bit.style.width = "64px";
+        bit.style.height = "64px";
+        bit.style.imageRendering = "pixelated";
+        bit.style.position = "absolute";
+        bit.style.pointerEvents = "none";
+        bit.style.zIndex = 5;
 
-    <div class="text-image reverse">
-      <div class="image-block">
-      <img src="images/appropriate-fonts.jpg" alt="Appropriate fonts example" width="500" height="400" style="border: 3px solid black;">
-      <cite>Appropriate Fonts: Bad Examples by Camden Gugel</cite>
-      </div>
-      <div>
-    <h3>Understand the goal for this design</h3>
-    <p>If you’re designing a brand or a website for a client, are they in an industry where they need a lot of trust from their customer? For example, maybe it’s a banking app. Or are they trying to disrupt the space they are in? In the same example, maybe you’re creating a site for a cryptocurrency app. Yes they want to gain the trust of their potential customer but they also want to stand out, maybe be a little more modern and bold to gain the attention and respect of a potential customer.</p>
-    <p>Understanding the intention behind the design will dictate your font choices. This is something Ran expands on this video on how to choose fonts.</p>
-  </div>
-    </div>
-    <q class="pull-quote">Good typography is invisible. Bad typography is everywhere.</q>
-    <p class="center">-Craig Ward</p>
-  </section>
+        if (direction === "right") {
+          bit.src = "Sprites/bit_right.gif";
+        } else if (direction === "left") {
+          bit.src = "Sprites/bit_left.gif";
+        } else {
+          bit.src = "Sprites/bit_idle.gif";
+        }
+        bitContainer.appendChild(bit);
+        lastDirection = direction;
+      }
+    }
 
-  <!-- Learn Section -->
-  <section class="learn-section">
-    <h2>Want to learn more about type and design?</h2>
-    <p>Consider checking out one of our programs for a deep dive into a specific topic. We offer 3 different programs that go deep into design, development, and how to build a successful freelance business. We give you the path to follow so you learn only the skills you need at your pace.</p>
+    function gameLoop() {
+      let direction = "idle";
 
-    <div class="three-columns">
-      <p>In <a href="https://www.flux-academy.com/courses/web-design-masterclass">The $10k Website Process</a>, you’ll discover a step-by-step process to design beautiful, high-value websites that achieve strategic goals for your clients. Master the art and strategy of website design, and increase the value of your services, as well as your rates.</p>
-      <p>In <a href="https://www.flux-academy.com/courses/the-webflow-masterclass">The Webflow Masterclass</a>, you’ll learn how to use Webflow to build custom, fully-functional websites quickly without learning how to code. Break free from restrictive templates, regain your creative freedom, and bring your best creations to life with this powerful visual development tool.</p>
-      <p>In <a href="https://www.flux-academy.com/courses/freelancing-for-web-designers">The 6 Figure Freelance Designer</a>, you’ll learn how building a successful business as a freelancer is possible anywhere with an internet connection. We give you a roadmap to follow to consistently attract high-value clients and make a great living doing what you love.</p>
-    </div>
+      if (keys["ArrowRight"] || keys["d"]) {
+        player.x += player.speed;
+        direction = "right";
+      }
+      if (keys["ArrowLeft"] || keys["a"]) {
+        player.x -= player.speed;
+        direction = "left";
+      }
 
-    <div class="center">
-      <a href="https://www.codecademy.com/catalog/subject/web-design" class="button">Click Here For Some Free HTML Tutorials By Codecademy</a>
-    </div>
-  </section>
+      if ((keys["ArrowUp"] || keys["w"] || keys[" "]) && player.onGround) {
+        player.dy = player.jumpStrength;
+        player.onGround = false;
+      }
 
-  <!-- Footer -->
-  <footer class="footer-section">
-    <p>© 2025 Camden Gugel | Web Design Coding a Webpage Assignment | Content from <a href="https://www.flux-academy.com/blog/the-ultimate-guide-to-choosing-fonts">The Ultimate Guide To Choosing Fonts</a> by Monica Galvan</p>
-  </footer>
+      player.dy += player.gravity;
+      player.y += player.dy;
 
+      if (player.y + player.height >= groundY) {
+        player.y = groundY - player.height;
+        player.dy = 0;
+        player.onGround = true;
+      }
+
+      player.x = Math.max(0, Math.min(worldWidth - player.width, player.x));
+
+      camX = player.x - canvas.width / 2 + player.width / 2;
+      camX = Math.max(0, Math.min(worldWidth - canvas.width, camX));
+
+      ctx.fillStyle = "#2A2A2A";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#666";
+      ctx.fillRect(-camX, groundY, worldWidth, 80);
+
+      sections.forEach(drawTextBox);
+
+      updateBitSprite(direction);
+
+      bit.style.left = `${player.x - camX}px`;
+      bit.style.top = `${player.y}px`;
+
+      checkSectionCollisions();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
 </body>
 </html>
